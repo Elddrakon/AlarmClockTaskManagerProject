@@ -3,109 +3,13 @@
 //Date: 2025-01-14.
 
 //För peizo noterna.
-#define NOTE_B0 31
-#define NOTE_C1 33
-#define NOTE_CS1 35
-#define NOTE_D1 37
-#define NOTE_DS1 39
-#define NOTE_E1 41
-#define NOTE_F1 44
-#define NOTE_FS1 46
-#define NOTE_G1 49
-#define NOTE_GS1 52
-#define NOTE_A1 55
-#define NOTE_AS1 58
-#define NOTE_B1 62
-#define NOTE_C2 65
-#define NOTE_CS2 69
-#define NOTE_D2 73
-#define NOTE_DS2 78
-#define NOTE_E2 82
-#define NOTE_F2 87
-#define NOTE_FS2 93
-#define NOTE_G2 98
-#define NOTE_GS2 104
-#define NOTE_A2 110
-#define NOTE_AS2 117
-#define NOTE_B2 123
-#define NOTE_C3 131
-#define NOTE_CS3 139
-#define NOTE_D3 147
-#define NOTE_DS3 156
-#define NOTE_E3 165
-#define NOTE_F3 175
-#define NOTE_FS3 185
-#define NOTE_G3 196
-#define NOTE_GS3 208
-#define NOTE_A3 220
-#define NOTE_AS3 233
-#define NOTE_B3 247
-#define NOTE_C4 262
-#define NOTE_CS4 277
-#define NOTE_D4 294
-#define NOTE_DS4 311
-#define NOTE_E4 330
-#define NOTE_F4 349
-#define NOTE_FS4 370
-#define NOTE_G4 392
-#define NOTE_GS4 415
-#define NOTE_A4 440
-#define NOTE_AS4 466
-#define NOTE_B4 494
-#define NOTE_C5 523
-#define NOTE_CS5 554
-#define NOTE_D5 587
-#define NOTE_DS5 622
-#define NOTE_E5 659
-#define NOTE_F5 698
-#define NOTE_FS5 740
-#define NOTE_G5 784
-#define NOTE_GS5 831
-#define NOTE_A5 880
-#define NOTE_AS5 932
-#define NOTE_B5 988
-#define NOTE_C6 1047
-#define NOTE_CS6 1109
-#define NOTE_D6 1175
-#define NOTE_DS6 1245
-#define NOTE_E6 1319
-#define NOTE_F6 1397
-#define NOTE_FS6 1480
-#define NOTE_G6 1568
-#define NOTE_GS6 1661
-#define NOTE_A6 1760
-#define NOTE_AS6 1865
-#define NOTE_B6 1976
-#define NOTE_C7 2093
-#define NOTE_CS7 2217
-#define NOTE_D7 2349
-#define NOTE_DS7 2489
-#define NOTE_E7 2637
-#define NOTE_F7 2794
-#define NOTE_FS7 2960
-#define NOTE_G7 3136
-#define NOTE_GS7 3322
-#define NOTE_A7 3520
-#define NOTE_AS7 3729
-#define NOTE_B7 3951
-#define NOTE_C8 4186
-#define NOTE_CS8 4435
-#define NOTE_D8 4699
-#define NOTE_DS8 4978
+#define BUZZER_PIN 8
 //Slutet av peizo noterna
 
 //För Peizo 
-int melody[] = {
-  NOTE_D5, NOTE_E5, NOTE_FS5, NOTE_A5, NOTE_G5, NOTE_FS5, NOTE_E5, NOTE_D5, // Part 1
-  NOTE_D5, NOTE_E5, NOTE_FS5, NOTE_A5, NOTE_G5, NOTE_FS5, NOTE_E5, NOTE_D5, // Part 2
-  NOTE_FS5, NOTE_A5, NOTE_B5, NOTE_G5, NOTE_FS5, NOTE_E5, NOTE_D5            // Part 3
-};
 
-int noteDurations[] = {
-  4, 4, 4, 8, 8, 8, 4, 4, // Part 1
-  4, 4, 4, 8, 8, 8, 4, 4, // Part 2
-  4, 8, 8, 8, 4, 4, 4      // Part 3
-};
+
+
 //Slutet av sektionen
 
 
@@ -129,6 +33,7 @@ void setup() {
   pinMode(5, OUTPUT);
   pinMode(6, OUTPUT);
   pinMode(7, INPUT);
+  pinMode(BUZZER_PIN, OUTPUT);
   digitalWrite(4, LOW);
   digitalWrite(5, LOW);
   digitalWrite(6, LOW);
@@ -160,7 +65,7 @@ void loop() {
 
   int number = 0;
   int iv2 = 0;
-
+  Serial.println("Button is ready to be pressed!");
   while (clockstarted == false) {
 
     if (digitalRead(7) == HIGH) {
@@ -292,27 +197,33 @@ void loop() {
       drawlist2(0, 10, String(now.hour()) + ":" + String(now.minute()) + ":" + String(now.second()), String(timestampfortask1[0]) + ":" + String(timestampfortask1[1]), String(timestampfortask2[0]) + ":" + String(timestampfortask2[1]), String(timestampfortask3[0]) + ":" + String(timestampfortask3[1]), String(timestampfortask4[0]) + ":" + String(timestampfortask4[1]), String(timestampfortask5[0]) + ":" + String(timestampfortask5[1]));
     }
   }
+
+
+
   if (timestampforwakeywakey[0] > now.hour() || timestampforwakeywakey[1] > now.minute()) {
-    while (!(timestampforwakeywakey[0] == now.hour() && timestampforwakeywakey[1] ==  now.minute()) && !digitalRead(7)) {
+    int nowhour = now.hour();
+    int nowminute = now.minute();
+    DateTime now = rtc.now();
+    while (!(timestampforwakeywakey[0] == nowhour && timestampforwakeywakey[1] == nowminute) && !digitalRead(7)) {
       DateTime now = rtc.now();
-      draw(0, 22, String(timestampforwakeywakey[0]) + ":" + String(timestampforwakeywakey[1]));
+      nowhour = now.hour();
+      nowminute = now.minute();
+      drawlist(0, 22, "Clock will ring at:", String(timestampforwakeywakey[0]) + ":" + String(timestampforwakeywakey[1]), "Current time: ", String(now.hour()) + ":" + String(now.minute()), "Better be prepeared!");
       delay(100);
       Serial.println("Waiting for alarm to go off!");
     }
-    if (timestampforwakeywakey[0] == now.hour() && timestampforwakeywakey[1] == now.minute()) {
+    if (timestampforwakeywakey[0] == nowhour && timestampforwakeywakey[1] == nowminute) {
       delay(1500);
       while (digitalRead(7) == false) {
         draw(0, 22, "Wakey Wakey!!!");
         delay(100);
-        for (int thisNote = 0; thisNote < sizeof(melody) / sizeof(melody[0]); thisNote++) {
-          
-          int noteDuration = 1000 / noteDurations[thisNote]; // Calculate note duration
-          tone(8, melody[thisNote], noteDuration);           // Play the note on pin 8
+        for (int i = 0; i < 5; i++) {
+          tone(BUZZER_PIN, 1000);           // Play the note on pin 8
 
-          int pauseBetweenNotes = noteDuration * 1.30;       // Add pause between notes
+          int pauseBetweenNotes = 1000;       // Add pause between notes
           delay(pauseBetweenNotes);
 
-          noTone(8); // Stop the tone playing
+          noTone(BUZZER_PIN); // Stop the tone playing
         }
         delay(3000);
       }
@@ -327,8 +238,11 @@ void loop() {
     return;
   }
   
+  Serial.println("Alarm has been stopped!")
   delay(1000);
   timerprocessor(timestampfortask1, answer1, answer2, answer3, answer4, answer5, timestampfortask1, timestampfortask2, timestampfortask3, timestampfortask4, timestampfortask5);
+  delay(1000);
+
   timerprocessor(timestampfortask2, answer1, answer2, answer3, answer4, answer5, timestampfortask1, timestampfortask2, timestampfortask3, timestampfortask4, timestampfortask5);
   timerprocessor(timestampfortask3, answer1, answer2, answer3, answer4, answer5, timestampfortask1, timestampfortask2, timestampfortask3, timestampfortask4, timestampfortask5);
   timerprocessor(timestampfortask4, answer1, answer2, answer3, answer4, answer5, timestampfortask1, timestampfortask2, timestampfortask3, timestampfortask4, timestampfortask5);
@@ -361,17 +275,22 @@ void timeinputer(int timestampfortask[], int &iv2var, int &ivar) {
 void timerprocessor(int timestampfortaskthing[], String ans1, String ans2, String ans3, String ans4, String ans5, int timestamptask1[], int timestamptask2[], int timestamptask3[], int timestamptask4[], int timestamptask5[]) { 
   DateTime now = rtc.now();
   if (timestampfortaskthing[0] > now.hour() || timestampfortaskthing[1] > now.minute()) {
+    DateTime now = rtc.now();
+    int nowhour = now.hour();
+    int nowminute = now.minute();
     while (timestampfortaskthing[0] > now.hour() || timestampfortaskthing[1] > now.minute() && digitalRead(7) == false) { //Buggy part
       DateTime now = rtc.now();
+      nowhour = now.hour();
+      nowminute = now.minute();
       drawlist3(0, 10, String(now.hour()) + ":" + String(now.minute()) + ":" + String(now.second()), String(ans1), String(ans2), String(ans3), String(ans4), String(ans5), String(timestamptask1[0]) + ":" + String(timestamptask1[1]), String(timestamptask2[0]) + ":" + String(timestamptask2[1]), String(timestamptask3[0]) + ":" + String(timestamptask3[1]), String(timestamptask4[0]) + ":" + String(timestamptask4[1]), String(timestamptask5[0]) + ":" + String(timestamptask5[1]));
-      delay(10);
+      delay(100);
     }
-    if (timestampfortaskthing[0] == now.hour() && timestampfortaskthing[1] != now.minute()) {
+    if (timestampfortaskthing[0] == nowhour && timestampfortaskthing[1] != nowminute) {
       draw(0, 22, "You ran out of time!");
       delay(3000);
     } else {
-      int amountofsavedhours = (timestampfortaskthing[0] - now.hour());
-      int amountofsavedminutes = ((amountofsavedhours * 60) + (timestampfortaskthing[1] - now.minute()));
+      int amountofsavedhours = (timestampfortaskthing[0] - nowhour);
+      int amountofsavedminutes = ((amountofsavedhours * 60) + (timestampfortaskthing[1] - nowminute));
       draw(0, 22, "you saved: " + String(amountofsavedminutes) + "minutes!");
       delay(3000);
     }
